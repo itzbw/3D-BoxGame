@@ -1,21 +1,20 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 let camera: THREE.OrthographicCamera,
   scene: THREE.Scene,
   renderer: THREE.WebGLRenderer;
-let stack: Array<{
-  threejs: THREE.Mesh;
-  width: number;
-  depth: number;
-  direction?: "x" | "z";
-}> = [];
+let stack: Array<{}> = [];
+
 let gameStarted = false;
 const originalBoxSize = 3;
 const boxHeight = 1;
 
 export function gameInit(elem: HTMLElement) {
   scene = new THREE.Scene();
+
+  addLayer(0, 0, originalBoxSize, originalBoxSize, "x");
+
+  addLayer(-10, 0, originalBoxSize, originalBoxSize, "z");
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 1);
   scene.add(ambientLight);
@@ -49,7 +48,7 @@ export function gameInit(elem: HTMLElement) {
   renderer.toneMappingExposure = 1;
   renderer.setPixelRatio(window.devicePixelRatio);
 
-  const controls = new OrbitControls(camera, renderer.domElement);
+  //   const controls = new OrbitControls(camera, renderer.domElement);
 
   const geometry = new THREE.BoxGeometry(3, 1, 3);
   const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
@@ -94,22 +93,15 @@ export function gameInit(elem: HTMLElement) {
     const topLayer = stack[stack.length - 1];
     const initCameraHeight = 4;
     topLayer.threejs.position[topLayer.direction] += speed;
-    if (topLayer && topLayer.direction) {
-      topLayer.threejs.position[topLayer.direction] += speed;
-    }
 
     if (camera.position.y < boxHeight * (stack.length - 2) + initCameraHeight) {
       camera.position.y += speed;
     }
 
-    requestAnimationFrame(animate);
-    controls.update();
+    // requestAnimationFrame(animate);
+    // controls.update();
     renderer.render(scene, camera);
   }
-
-  addLayer(0, 0, originalBoxSize, originalBoxSize, "x");
-
-  addLayer(-10, 0, originalBoxSize, originalBoxSize, "z");
 
   window.addEventListener("click", () => {
     if (!gameStarted) {
