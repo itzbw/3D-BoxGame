@@ -5,14 +5,33 @@ let camera: THREE.OrthographicCamera,
   scene: THREE.Scene,
   renderer: THREE.WebGLRenderer;
 let world: CANNON.World;
-let stack: Array<{}> = [];
+let stack: Array<any> = [];
 let overhangs: Array<{}> = [];
 
 let gameStarted = false;
 const originalBoxSize = 3;
 const boxHeight = 1;
 
+let stackLengthDisplay: HTMLDivElement;
+let stackLengthCount = 0;
+
 export function gameInit(elem: HTMLElement) {
+  stackLengthDisplay = document.createElement("div");
+  stackLengthDisplay.style.position = "absolute";
+  stackLengthDisplay.style.top = "20px";
+  stackLengthDisplay.style.left = "20px";
+  stackLengthDisplay.style.fontSize = "24px";
+  stackLengthDisplay.style.fontWeight = "bold";
+  stackLengthDisplay.style.color = "white";
+  stackLengthDisplay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  stackLengthDisplay.style.padding = "10px";
+  stackLengthDisplay.style.borderRadius = "5px";
+  elem.appendChild(stackLengthDisplay);
+
+  // Update stack length display
+  function updateStackLengthDisplay() {
+    stackLengthDisplay.textContent = `Level: ${stackLengthCount}`;
+  }
   // initial Cannon JS world
 
   world = new CANNON.World();
@@ -20,10 +39,6 @@ export function gameInit(elem: HTMLElement) {
   world.broadphase = new CANNON.NaiveBroadphase();
   world.solver.iterations = 40;
   scene = new THREE.Scene();
-
-  addLayer(0, 0, originalBoxSize, originalBoxSize);
-
-  addLayer(-10, 0, originalBoxSize, originalBoxSize, "x");
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 1);
   scene.add(ambientLight);
@@ -59,59 +74,27 @@ export function gameInit(elem: HTMLElement) {
   renderer.setPixelRatio(window.devicePixelRatio);
 
   //   const controls = new OrbitControls(camera, renderer.domElement);
-
-  //   const numberContainer = document.createElement("div");
-  //   numberContainer.style.position = "absolute";
-  //   numberContainer.style.top = "0";
-  //   numberContainer.style.left = "0";
-  //   numberContainer.style.width = "100%";
-  //   numberContainer.style.height = "100%";
-  //   numberContainer.style.pointerEvents = "none";
-  //   elem.appendChild(numberContainer);
+  addLayer(0, 0, originalBoxSize, originalBoxSize, "z", true);
+  //   addLayer(-10, 0, originalBoxSize, originalBoxSize, "x");
 
   function addLayer(
     x: number,
     z: number,
     width: number,
     depth: number,
-    direction: "x" | "z" = "z"
+    direction: "x" | "z" = "z",
+    isInitialLayer: boolean = false
   ) {
     const y = boxHeight * stack.length;
     const layer = createBox(x, y, z, width, depth);
     layer.direction = direction;
 
     stack.push(layer);
-    // addStackNumber(stack.length, x, y, z);
+    if (!isInitialLayer) {
+      stackLengthCount++; // Increment count only for non-initial layers
+      updateStackLengthDisplay();
+    }
   }
-
-  //   function addStackNumber(number: number, x: number, y: number, z: number) {
-  //     const numberElement = document.createElement("div");
-  //     numberElement.textContent = number.toString();
-  //     numberElement.style.position = "absolute";
-  //     numberElement.style.fontSize = "24px";
-  //     numberElement.style.fontWeight = "bold";
-  //     numberElement.style.color = "black";
-  //     numberElement.style.backgroundColor = "rgba(255, 255, 255, 0.7)";
-  //     numberElement.style.padding = "2px 8px";
-  //     numberElement.style.borderRadius = "12px";
-  //     numberElement.style.transform = "translate(-50%, -50%)";
-  //     numberContainer.appendChild(numberElement);
-
-  //     function updatePosition() {
-  //       const vector = new THREE.Vector3(x, y + boxHeight / 2 + 0.1, z);
-  //       vector.project(camera);
-  //       const widthHalf = window.innerWidth / 2;
-  //       const heightHalf = window.innerHeight / 2;
-  //       const pixelX = vector.x * widthHalf + widthHalf;
-  //       const pixelY = -(vector.y * heightHalf) + heightHalf;
-
-  //       numberElement.style.left = `${pixelX}px`;
-  //       numberElement.style.top = `${pixelY}px`;
-  //     }
-
-  //     updatePosition();
-  //     return updatePosition;
-  //   }
 
   function addOverhang(x: number, z: number, width: number, depth: number) {
     const y = boxHeight * (stack.length - 1);
@@ -188,11 +171,11 @@ export function gameInit(elem: HTMLElement) {
       updatePhysics();
     }
     // Update all stack number positions
-    // stack.forEach((layer, index) => {
-    //   if (layer.updateNumberPosition) {
-    //     layer.updateNumberPosition();
-    //   }
-    // });
+    stack.forEach((layer) => {
+      if (layer.updateNumberPosition) {
+        layer.updateNumberPosition();
+      }
+    });
     renderer.render(scene, camera);
   }
 
@@ -209,6 +192,7 @@ export function gameInit(elem: HTMLElement) {
   window.addEventListener("click", () => {
     if (!gameStarted) {
       gameStarted = true;
+      addLayer(-10, 0, originalBoxSize, originalBoxSize, "x");
     } else {
       const topLayer = stack[stack.length - 1];
       const previousLayer = stack[stack.length - 2];
@@ -247,15 +231,30 @@ export function gameInit(elem: HTMLElement) {
         const nextDirection = direction === "x" ? "z" : "x";
 
         addLayer(nextX, nextZ, topLayer.width, topLayer.depth, nextDirection);
+        updateStackLengthDisplay();
+
+        // const newLayer = addLayer(
+        //   nextX,
+        //   nextZ,
+        //   topLayer.width,
+        //   topLayer.depth,
+        //   nextDirection
+        // );
         // newLayer.updateNumberPosition = addStackNumber(
         //   stack.length,
         //   nextX,
         //   newLayer.threejs.position.y,
         //   nextZ
         // );
+      } else {
+        // Game over logic
+        console.log("Game Over! Final stack length:", stackLengthCount);
+        // You can add more game over handling here if needed
       }
     }
   });
+
+  updateStackLengthDisplay();
 
   window.addEventListener("resize", () => {
     const aspect = window.innerWidth / window.innerHeight;
