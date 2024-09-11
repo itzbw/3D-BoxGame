@@ -576,6 +576,16 @@ callsites@^3.0.0:
   resolved "https://registry.npmjs.org/callsites/-/callsites-3.1.0.tgz"
   integrity sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==
 
+cannon-es@^0.20.0:
+  version "0.20.0"
+  resolved "https://registry.yarnpkg.com/cannon-es/-/cannon-es-0.20.0.tgz#bf2f62a674701f37e3d861c90668a32d4d32f082"
+  integrity sha512-eZhWTZIkFOnMAJOgfXJa9+b3kVlvG+FX4mdkpePev/w/rP5V8NRquGyEozcjPfEoXUlb+p7d9SUcmDSn14prOA==
+
+cannon@^0.6.2:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/cannon/-/cannon-0.6.2.tgz#1e7bc72dd5841982f3c104c2bc578bfa4fb1c572"
+  integrity sha512-n/7wWSXr8KOSvjad2x0fJHgpMepKjOKi+NdSnjfYyijoDBZnp4JQKgPcpv28jlXoWM+N9zVYU09J0A6Qxx+Y7w==
+
 chalk@^4.0.0:
   version "4.1.2"
   resolved "https://registry.npmjs.org/chalk/-/chalk-4.1.2.tgz"
