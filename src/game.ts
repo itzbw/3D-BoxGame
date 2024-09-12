@@ -9,6 +9,7 @@ let stack: Array<any> = [];
 let overhangs: Array<{}> = [];
 
 let gameStarted = false;
+let isFirstClick = true; // New flag to control the first click
 const originalBoxSize = 3;
 const boxHeight = 1;
 
@@ -16,6 +17,42 @@ let stackLengthDisplay: HTMLDivElement;
 let stackLengthCount = 0;
 
 export function gameInit(elem: HTMLElement) {
+  // Create Game Start Screen
+  const gameStartScreen = document.createElement("div");
+  gameStartScreen.id = "gameStartScreen";
+  gameStartScreen.style.position = "absolute";
+  gameStartScreen.style.top = "50%";
+  gameStartScreen.style.left = "50%";
+  gameStartScreen.style.transform = "translate(-50%, -50%)";
+  gameStartScreen.style.fontSize = "24px";
+  gameStartScreen.style.fontWeight = "bold";
+  gameStartScreen.style.color = "white";
+  gameStartScreen.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+  gameStartScreen.style.padding = "20px";
+  gameStartScreen.style.borderRadius = "10px";
+  gameStartScreen.style.textAlign = "center";
+  gameStartScreen.style.cursor = "pointer";
+  gameStartScreen.textContent = "Start";
+  elem.appendChild(gameStartScreen);
+
+  // Create Game Over Screen
+  const gameOverScreen = document.createElement("div");
+  gameOverScreen.id = "gameOverScreen";
+  gameOverScreen.style.position = "absolute";
+  gameOverScreen.style.top = "50%";
+  gameOverScreen.style.left = "50%";
+  gameOverScreen.style.transform = "translate(-50%, -50%)";
+  gameOverScreen.style.fontSize = "24px";
+  gameOverScreen.style.fontWeight = "bold";
+  gameOverScreen.style.color = "black";
+  gameOverScreen.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+  gameOverScreen.style.padding = "20px";
+  gameOverScreen.style.borderRadius = "10px";
+  gameOverScreen.style.textAlign = "center";
+  gameOverScreen.style.display = "none"; // Hide initially
+  gameOverScreen.textContent = "Game Over! Try Again";
+  elem.appendChild(gameOverScreen);
+
   stackLengthDisplay = document.createElement("div");
   stackLengthDisplay.style.position = "absolute";
   stackLengthDisplay.style.top = "20px";
@@ -32,6 +69,29 @@ export function gameInit(elem: HTMLElement) {
   function updateStackLengthDisplay() {
     stackLengthDisplay.textContent = `Level: ${stackLengthCount}`;
   }
+
+  // Hide Game Start Screen when clicked and start the game
+  gameStartScreen?.addEventListener("click", (event) => {
+    event.stopPropagation(); // Prevent the click from bubbling up to the game logic
+
+    if (!gameStarted && isFirstClick) {
+      // First click to start the game
+      isFirstClick = false;
+      gameStarted = true;
+
+      // Hide the game start screen
+      gameStartScreen.style.display = "none";
+
+      // Start the game by adding the first moving layer
+      addLayer(-10, 0, originalBoxSize, originalBoxSize, "x");
+    }
+  });
+
+  // Restart the game when Game Over screen is clicked
+  gameOverScreen.addEventListener("click", () => {
+    location.reload(); // Reload the page to restart the game
+  });
+
   // initial Cannon JS world
 
   world = new CANNON.World();
@@ -112,7 +172,7 @@ export function gameInit(elem: HTMLElement) {
   ) {
     const geometry = new THREE.BoxGeometry(width, boxHeight, depth);
 
-    const color = new THREE.Color(`hsl(${30 + stack.length * 4}, 100%, 50%)`);
+    const color = new THREE.Color(`hsl(${180 + stack.length * 4}, 100%, 50%)`);
     const material = new THREE.MeshLambertMaterial({ color });
 
     const mesh = new THREE.Mesh(geometry, material);
@@ -170,12 +230,6 @@ export function gameInit(elem: HTMLElement) {
       }
       updatePhysics();
     }
-    // Update all stack number positions
-    stack.forEach((layer) => {
-      if (layer.updateNumberPosition) {
-        layer.updateNumberPosition();
-      }
-    });
     renderer.render(scene, camera);
   }
 
@@ -190,10 +244,7 @@ export function gameInit(elem: HTMLElement) {
   }
 
   window.addEventListener("click", () => {
-    if (!gameStarted) {
-      gameStarted = true;
-      addLayer(-10, 0, originalBoxSize, originalBoxSize, "x");
-    } else {
+    if (gameStarted && !isFirstClick) {
       const topLayer = stack[stack.length - 1];
       const previousLayer = stack[stack.length - 2];
       const direction = topLayer.direction;
@@ -232,24 +283,16 @@ export function gameInit(elem: HTMLElement) {
 
         addLayer(nextX, nextZ, topLayer.width, topLayer.depth, nextDirection);
         updateStackLengthDisplay();
-
-        // const newLayer = addLayer(
-        //   nextX,
-        //   nextZ,
-        //   topLayer.width,
-        //   topLayer.depth,
-        //   nextDirection
-        // );
-        // newLayer.updateNumberPosition = addStackNumber(
-        //   stack.length,
-        //   nextX,
-        //   newLayer.threejs.position.y,
-        //   nextZ
-        // );
       } else {
-        // Game over logic
+        // Game Over logic
+        gameStarted = false;
         console.log("Game Over! Final stack length:", stackLengthCount);
-        // You can add more game over handling here if needed
+
+        // Show Game Over Screen
+        const gameOverScreen = document.getElementById("gameOverScreen");
+        if (gameOverScreen) {
+          gameOverScreen.style.display = "block";
+        }
       }
     }
   });
