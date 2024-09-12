@@ -1,5 +1,7 @@
 #root {
   position: fixed;
+  margin: 0;
+  padding: 0;
   top: 0;
   left: 0;
   width: 100%;
@@ -7,10 +9,11 @@
   background: black;
 }
 
-body {
+.body {
   margin: 0;
+  padding: 0;
   display: block;
-  place-items: center;
+  /* place-items: center; */
   width: 100vw;
   height: 100vh;
   color: black;

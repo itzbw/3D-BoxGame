@@ -219,9 +219,35 @@ export function gameInit(elem: HTMLElement) {
     if (gameStarted) {
       const speed = 0.15;
       const topLayer = stack[stack.length - 1];
+      const previousLayer = stack[stack.length - 2];
 
       topLayer.threejs.position[topLayer.direction] += speed;
       topLayer.cannonjs.position[topLayer.direction] += speed;
+
+      const buffer = 25; // Adjust this buffer value if needed
+
+      if (previousLayer) {
+        const direction = topLayer.direction;
+        const delta =
+          topLayer.threejs.position[direction] -
+          previousLayer.threejs.position[direction];
+        const overhangSize = Math.abs(delta);
+
+        const size = direction === "x" ? topLayer.width : topLayer.depth;
+
+        // Only check for game over if the block has moved beyond the size + buffer
+        if (overhangSize > size + buffer) {
+          gameStarted = false;
+          console.log("Game Over! Final stack length:", stackLengthCount);
+
+          // Show Game Over Screen
+          const gameOverScreen = document.getElementById("gameOverScreen");
+          if (gameOverScreen) {
+            gameOverScreen.style.display = "block";
+          }
+          return; // Exit the function early if game over
+        }
+      }
 
       // adjust camera
       const cameraTarget = boxHeight * (stack.length - 2) + 4;
