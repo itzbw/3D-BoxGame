@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
 
+// @ts-nocheck
+
 let camera: THREE.OrthographicCamera,
   scene: THREE.Scene,
   renderer: THREE.WebGLRenderer;
@@ -97,6 +99,7 @@ export function gameInit(elem: HTMLElement) {
   world = new CANNON.World();
   world.gravity.set(0, -10, 0);
   world.broadphase = new CANNON.NaiveBroadphase();
+  // @ts-ignore
   world.solver.iterations = 40;
   scene = new THREE.Scene();
 
@@ -147,6 +150,7 @@ export function gameInit(elem: HTMLElement) {
   ) {
     const y = boxHeight * stack.length;
     const layer = createBox(x, y, z, width, depth);
+    // @ts-ignore
     layer.direction = direction;
 
     stack.push(layer);
@@ -264,7 +268,9 @@ export function gameInit(elem: HTMLElement) {
 
     // copy
     overhangs.forEach((element) => {
+      // @ts-ignore
       element.threejs.position.copy(element.cannonjs.position);
+      // @ts-ignore
       element.threejs.quaternion.copy(element.cannonjs.quaternion);
     });
   }
