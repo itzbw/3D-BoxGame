@@ -9,6 +9,8 @@ let camera: THREE.OrthographicCamera,
 let world: CANNON.World;
 let stack: Array<any> = [];
 let overhangs: Array<{}> = [];
+let lastTime = 0;
+const boxSpeed = 5; // Units per second
 
 let gameStarted = false;
 let isFirstClick = true; // New flag to control the first click
@@ -131,7 +133,7 @@ export function gameInit(elem: HTMLElement) {
   renderer.setSize(window.innerWidth, window.innerHeight);
   elem.appendChild(renderer.domElement);
 
-  renderer.setAnimationLoop(animate);
+  // renderer.setAnimationLoop(animate);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -219,16 +221,20 @@ export function gameInit(elem: HTMLElement) {
     topLayer.cannonjs.addShape(shape);
   }
 
-  function animate() {
+  function animate(currentTime: number) {
     if (gameStarted) {
-      const speed = 0.15;
+      // const speed = 0.15;
+      const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
+      lastTime = currentTime;
       const topLayer = stack[stack.length - 1];
       const previousLayer = stack[stack.length - 2];
 
-      topLayer.threejs.position[topLayer.direction] += speed;
-      topLayer.cannonjs.position[topLayer.direction] += speed;
+      // Move the top layer based on delta time
+      const movement = boxSpeed * deltaTime;
+      topLayer.threejs.position[topLayer.direction] += movement;
+      topLayer.cannonjs.position[topLayer.direction] += movement;
 
-      const buffer = 25; // Adjust this buffer value if needed
+      const buffer = 10; // Adjust this buffer value if needed
 
       if (previousLayer) {
         const direction = topLayer.direction;
@@ -256,12 +262,16 @@ export function gameInit(elem: HTMLElement) {
       // adjust camera
       const cameraTarget = boxHeight * (stack.length - 2) + 4;
       if (camera.position.y < cameraTarget) {
-        camera.position.y += speed;
+        camera.position.y += movement;
       }
       updatePhysics();
     }
     renderer.render(scene, camera);
+    requestAnimationFrame(animate);
   }
+
+  renderer.setAnimationLoop(null); // Remove the built-in animation loop
+  requestAnimationFrame(animate); // Start our custom animation loop
 
   function updatePhysics() {
     world.step(1 / 60); // 60 sec
