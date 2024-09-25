@@ -73,6 +73,21 @@ h6 {
 }
 
 /* footer */
+@media (max-width: 420px) {
+  ul {
+    grid-auto-flow: row;
+    justify-items: center;
+    margin: 0 auto;
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+    text-align: center;
+  }
+  li {
+    color: white;
+  }
+}
+
 ul {
   display: inline-grid;
   grid-auto-flow: row;
@@ -81,7 +96,7 @@ ul {
   margin: auto;
 }
 
-@media (min-width: 500px) {
+@media (min-width: 421px) {
   ul {
     grid-auto-flow: column;
     list-style-type: none;
