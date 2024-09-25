@@ -54,7 +54,18 @@ export function gameInit(elem: HTMLElement) {
   gameOverScreen.style.borderRadius = "10px";
   gameOverScreen.style.textAlign = "center";
   gameOverScreen.style.display = "none"; // Hide initially
-  gameOverScreen.textContent = "Game Over! Try Again";
+  // Create separate elements for "Game Over!" and "Try Again"
+  const gameOverText = document.createElement("div");
+  gameOverText.textContent = "Game Over!";
+  gameOverText.style.marginBottom = "10px"; // Add some space between the lines
+
+  const tryAgainText = document.createElement("div");
+  tryAgainText.textContent = "Try Again";
+
+  // Append both elements to the gameOverScreen
+  gameOverScreen.appendChild(gameOverText);
+  gameOverScreen.appendChild(tryAgainText);
+
   elem.appendChild(gameOverScreen);
 
   stackLengthDisplay = document.createElement("div");
